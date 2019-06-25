@@ -36,7 +36,7 @@ class TranslateTransformer(ASTWalker):
             literal.value = literal.value.translate(self.table)
 
 # public API
-def translate(ast, integer_flag, skip_re_range):
+def translate(ast, integer_flag, skip_re_range, vstringfuzzx):
     if integer_flag:
         character_set = WITH_INTEGERS
     else:

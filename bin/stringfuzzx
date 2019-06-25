@@ -42,6 +42,7 @@ DEFAULT_FACTOR         = 2
 DEFAULT_INTEGER_FLAG   = False
 DEFAULT_SKIP_RE_RANGE  = True
 DEFAULT_SKIP_STR_TO_RE = True
+DEFAULT_VSTRINGFUZZX   = False
 
 GET_MODEL = "get-model"
 GET_INFO  = "get-info"
@@ -88,6 +89,13 @@ def main():
         default = SMT_25_STRING,
         help    = 'output language (default: {})'.format(SMT_25_STRING)
     )
+    global_parser.add_argument(
+        '--vstringfuzzx',
+        dest    = 'vstringfuzzx',
+        action  = 'store_true',
+        default = DEFAULT_VSTRINGFUZZX,
+        help    = 'enables vstringfuzzx mode'
+    )
 
     seed_group = global_parser.add_mutually_exclusive_group()
     seed_group.add_argument(
@@ -107,6 +115,7 @@ def main():
         default = DEFAULT_RANDOM,
         help    = 'seed the random number generator with the current time (default: {})'.format(DEFAULT_RANDOM)
     )
+
 
     # get subparsers
     subparsers = global_parser.add_subparsers(dest='transformer', help='transformer choice')
@@ -215,8 +224,11 @@ def main():
     # get args as a dict
     transformer_args = vars(args)
 
+    vstringfuzzmode = args.vstringfuzzx
+
     # pop arguments that are specific to this script because
     # they shouldn't be passed on to the transformer
+    transformer_args.pop('vstringfuzzx')
     transformer_args.pop('input_file')
     transformer_args.pop('input_language')
     transformer_args.pop('output_language')
@@ -224,6 +236,7 @@ def main():
     transformer_args.pop('random')
     transformer_args.pop('transformer')
 
+    # If in the vstringfuzz mode, only output raw SMT file + the character mapping. 
     # run the transformer with the args
     transformed = transformer(ast, **transformer_args)
 
