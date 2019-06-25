@@ -7,7 +7,9 @@ import copy
 
 from stringfuzz.ast import StringLitNode, ReRangeNode
 from stringfuzz.ast_walker import ASTWalker
+from stringfuzz.generator import generate
 from stringfuzz import ALL_CHARS
+from stringfuzz.constants import SMT_25_STRING
 
 __all__ = [
     'translate'
@@ -16,18 +18,38 @@ __all__ = [
 WITH_INTEGERS    = list(ALL_CHARS)
 WITHOUT_INTEGERS = [c for c in ALL_CHARS if not c.isdecimal()]
 
-class TranslateTransformer(ASTWalker):
-    def __init__(self, ast, character_set, skip_re_range):
-        super().__init__(ast)
-        self.table = self.make_table(character_set)
-        self.skip_re_range = skip_re_range
+def _replace_escchar(str_repl: str):
+    repl_map = {
+        '\n': '\\n',
+        '\t': '\\t',
+        '\"': '\\"',
+        '\r': '\\r'
+    }
+    for key, val in repl_map.items():
+        str_repl = str_repl.replace(key, val)
+    return str_repl
+class StringShuffler:
+    """ Representation for Shuffler function of strings.
+    """
+    def __init__(self, character_set):
+        shuffled_list = copy.copy(character_set)
+        random.shuffle(shuffled_list)
+        self.shuffled = ''.join(shuffled_list)
+        self.character_set = ''.join(character_set)
 
-    def make_table(self, character_set):
-        shuffled = copy.copy(character_set)
-        random.shuffle(shuffled)
-        shuffled = ''.join(shuffled)
-        character_set = ''.join(character_set)
-        return str.maketrans(character_set, shuffled)
+    def get_table(self):
+        return str.maketrans(self.character_set, self.shuffled)
+
+    def get_sexpr(self):
+        return '("{0}" "{1}")'.format(_replace_escchar(self.character_set), _replace_escchar(self.shuffled))
+
+
+class TranslateTransformer(ASTWalker):
+    def __init__(self, ast, shuffler, skip_re_range):
+        super().__init__(ast)
+        self.shuffler = shuffler
+        self.table = self.shuffler.get_table()
+        self.skip_re_range = skip_re_range
 
     def exit_literal(self, literal, parent):
         if isinstance(literal, StringLitNode):
@@ -41,5 +63,15 @@ def translate(ast, integer_flag, skip_re_range, vstringfuzzx):
         character_set = WITH_INTEGERS
     else:
         character_set = WITHOUT_INTEGERS
-    transformed = TranslateTransformer(ast, character_set, skip_re_range).walk()
+
+    shuffler = StringShuffler(character_set)
+    if vstringfuzzx:
+        print("Test VStringFuzzX")
+        print(shuffler.get_sexpr())
+        print("Original Problem")
+        print(generate(ast, SMT_25_STRING))
+
+        raise NotImplementedError
+    else:
+        transformed = TranslateTransformer(ast, shuffler, skip_re_range).walk()
     return transformed

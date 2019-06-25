@@ -228,7 +228,7 @@ def main():
 
     # pop arguments that are specific to this script because
     # they shouldn't be passed on to the transformer
-    transformer_args.pop('vstringfuzzx')
+    # transformer_args.pop('vstringfuzzx')
     transformer_args.pop('input_file')
     transformer_args.pop('input_language')
     transformer_args.pop('output_language')
