@@ -5,6 +5,7 @@ every character in a string literal n times for some n
 
 from stringfuzz.ast import StringLitNode, IntLitNode, ReRangeNode
 from stringfuzz.ast_walker import ASTWalker
+from stringfuzz.sf_vsfx import process_vsfx, VSFX_MULTIPLY
 
 __all__ = [
     'multiply',
@@ -28,6 +29,9 @@ class MultiplyTransformer(ASTWalker):
             literal.value = literal.value * self.factor
 
 # public API
-def multiply(ast, factor, skip_re_range):
-    transformed = MultiplyTransformer(ast, factor, skip_re_range).walk()
+def multiply(ast, factor, skip_re_range, vstringfuzzx):
+    if vstringfuzzx:
+        transformed = process_vsfx(ast, VSFX_MULTIPLY, [str(factor)])
+    else: 
+        transformed = MultiplyTransformer(ast, factor, skip_re_range).walk()
     return transformed

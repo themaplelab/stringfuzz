@@ -5,6 +5,7 @@ Permuting the alphabet in every string literal.
 import random
 import copy
 
+from stringfuzz.sf_vsfx import process_vsfx, VSFX_TRANSLATE
 from stringfuzz.ast import StringLitNode, ReRangeNode
 from stringfuzz.ast_walker import ASTWalker
 from stringfuzz.generator import generate
@@ -40,8 +41,11 @@ class StringShuffler:
     def get_table(self):
         return str.maketrans(self.character_set, self.shuffled)
 
-    def get_sexpr(self):
+    def get_sexpr(self) -> str:
         return '("{0}" "{1}")'.format(_replace_escchar(self.character_set), _replace_escchar(self.shuffled))
+    
+    def get_charpair(self) -> list:
+        return [self.character_set, self.shuffled]
 
 
 class TranslateTransformer(ASTWalker):
@@ -66,12 +70,8 @@ def translate(ast, integer_flag, skip_re_range, vstringfuzzx):
 
     shuffler = StringShuffler(character_set)
     if vstringfuzzx:
-        print("Test VStringFuzzX")
-        print(shuffler.get_sexpr())
-        print("Original Problem")
-        print(generate(ast, SMT_25_STRING))
-
-        raise NotImplementedError
+        transformed = process_vsfx(ast, VSFX_TRANSLATE, shuffler.get_charpair())
     else:
         transformed = TranslateTransformer(ast, shuffler, skip_re_range).walk()
+        
     return transformed

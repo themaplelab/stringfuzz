@@ -35,6 +35,12 @@ TRANSFORMERS = {
     MULTIPLY:    multiply
 }
 
+VSFX_SUPPORTED_FUNCS = {
+    TRANSFORMERS[TRANSLATE],
+    TRANSFORMERS[ROTATE],
+    TRANSFORMERS[MULTIPLY],
+}
+
 # defaults
 DEFAULT_SEED           = 0
 DEFAULT_RANDOM         = False
@@ -224,8 +230,6 @@ def main():
     # get args as a dict
     transformer_args = vars(args)
 
-    vstringfuzzmode = args.vstringfuzzx
-
     # pop arguments that are specific to this script because
     # they shouldn't be passed on to the transformer
     # transformer_args.pop('vstringfuzzx')
@@ -234,7 +238,11 @@ def main():
     transformer_args.pop('output_language')
     transformer_args.pop('seed')
     transformer_args.pop('random')
-    transformer_args.pop('transformer')
+    transformer_args.pop('transformer') 
+
+    if transformer not in VSFX_SUPPORTED_FUNCS:
+        transformer_args.pop('vstringfuzzx')
+    # FIXME: How do we handle skip_re_range? 
 
     # If in the vstringfuzz mode, only output raw SMT file + the character mapping. 
     # run the transformer with the args
