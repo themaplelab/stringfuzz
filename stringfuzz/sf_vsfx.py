@@ -11,7 +11,7 @@ VSFX_REVERSE = "reverse"
 VSFX_MULTIPLY = "multiply"
 
 
-def process_vsfx(problem: list, mode: str,
+def process_vsfx(vsfxpath: str, problem: list, mode: str,
     param: ty.List[ty.Union[str, int]]=None,
     args: ty.Union[None, ty.List]=None) -> list:
     if args is None:
@@ -19,7 +19,7 @@ def process_vsfx(problem: list, mode: str,
     if param is None:
         param = []
 
-    vsfx_path = os.path.join(os.environ["VSFX_PATH"], "vsfx")
+    vsfx_path = os.path.join(vsfxpath, "vsfx")
 
     proc = subprocess.run(
         [vsfx_path, mode] + param + args,

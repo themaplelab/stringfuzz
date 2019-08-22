@@ -23,9 +23,9 @@ class ReverseTransformer(ASTWalker):
             expr.body = reversed(expr.body)
 
 # public API
-def reverse(ast, vstringfuzzx=False):
+def reverse(ast, vsfxpath, vstringfuzzx):
     if vstringfuzzx:
-        transformed = process_vsfx(ast, VSFX_REVERSE)
+        transformed = process_vsfx(vsfxpath, ast, VSFX_REVERSE)
     else:
         transformed = ReverseTransformer(ast).walk()
     return transformed

@@ -62,7 +62,7 @@ class TranslateTransformer(ASTWalker):
             literal.value = literal.value.translate(self.table)
 
 # public API
-def translate(ast, integer_flag, skip_re_range, vstringfuzzx):
+def translate(ast, integer_flag, skip_re_range, vstringfuzzx, vsfxpath):
     if integer_flag:
         character_set = WITH_INTEGERS
     else:
@@ -70,8 +70,8 @@ def translate(ast, integer_flag, skip_re_range, vstringfuzzx):
 
     shuffler = StringShuffler(character_set)
     if vstringfuzzx:
-        transformed = process_vsfx(ast, VSFX_TRANSLATE, shuffler.get_charpair())
+        transformed = process_vsfx(vsfxpath, ast, VSFX_TRANSLATE, shuffler.get_charpair())
     else:
         transformed = TranslateTransformer(ast, shuffler, skip_re_range).walk()
-        
+
     return transformed

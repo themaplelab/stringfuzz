@@ -29,9 +29,9 @@ class MultiplyTransformer(ASTWalker):
             literal.value = literal.value * self.factor
 
 # public API
-def multiply(ast, factor, skip_re_range, vstringfuzzx):
+def multiply(ast, factor, skip_re_range, vstringfuzzx, vsfxpath):
     if vstringfuzzx:
-        transformed = process_vsfx(ast, VSFX_MULTIPLY, [str(factor)])
+        transformed = process_vsfx(vsfxpath, ast, VSFX_MULTIPLY, [str(factor)])
     else: 
         transformed = MultiplyTransformer(ast, factor, skip_re_range).walk()
     return transformed

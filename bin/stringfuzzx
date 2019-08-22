@@ -7,6 +7,7 @@ The fuzzer tool that transforms existing problems.
 import sys
 import argparse
 import random
+import os
 
 from stringfuzz.constants import LANGUAGES, SMT_20_STRING, SMT_25_STRING
 from stringfuzz.transformers import unprintable, nop, rotate, fuzz, graft, translate, reverse, multiply
@@ -64,10 +65,18 @@ def should_keep(expr):
             return False
     return True
 
+def vsfx_path_or_default():
+    if 'VSFX_PATH' not in os.environ:
+        return '.'
+    else:
+        return os.environ['VSFX_PATH'] 
+
 def main():
 
     # create arg parser
     global_parser = argparse.ArgumentParser(description='SMTLIB 2.* problem transformer.')
+    default_vsfx = vsfx_path_or_default()
+
     global_parser.add_argument(
         '--file',
         '-f',
@@ -98,9 +107,16 @@ def main():
     global_parser.add_argument(
         '--vstringfuzzx',
         dest    = 'vstringfuzzx',
-        action  = 'store_true',
+        action  = 'store_false',
         default = DEFAULT_VSTRINGFUZZX,
         help    = 'enables vstringfuzzx mode'
+    )
+    global_parser.add_argument(
+        '--vsfx-path',
+        dest    = 'vsfxpath',
+        type    = str,
+        default = default_vsfx,
+        help    = 'path to vstringfuzzx executable (default: {})'.format(default_vsfx)
     )
 
     seed_group = global_parser.add_mutually_exclusive_group()
@@ -242,6 +258,8 @@ def main():
 
     if transformer not in VSFX_SUPPORTED_FUNCS:
         transformer_args.pop('vstringfuzzx')
+        transformer_args.pop('vsfxpath')
+        
     # FIXME: How do we handle skip_re_range? 
 
     # If in the vstringfuzz mode, only output raw SMT file + the character mapping. 
